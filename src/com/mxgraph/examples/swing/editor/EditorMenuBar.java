@@ -87,7 +87,8 @@ public class EditorMenuBar extends JMenuBar
 
 		JMenu menu = null;
 		JMenu submenu = null;
-
+		menu = add(new JMenu(mxResources.get("Save Graph in DB")));
+		menu.add(editor.bind(mxResources.get("save database"),new EditorActions.SaveActionDB(),"/com/mxgraph/examples/swing/images/save.gif"));
 		// Creates the file menu
 		menu = add(new JMenu(mxResources.get("file")));
 
@@ -99,7 +100,7 @@ public class EditorMenuBar extends JMenuBar
 
 		menu.add(editor.bind(mxResources.get("save"), new SaveAction(false), "/com/mxgraph/examples/swing/images/save.gif"));
 		menu.add(editor.bind(mxResources.get("saveAs"), new SaveAction(true), "/com/mxgraph/examples/swing/images/saveas.gif"));
-
+		menu.add(editor.bind(mxResources.get("save database"),new EditorActions.SaveActionDB(),"/com/mxgraph/examples/swing/images/save.gif"));
 		menu.addSeparator();
 
 		menu.add(editor.bind(mxResources.get("pageSetup"), new PageSetupAction(), "/com/mxgraph/examples/swing/images/pagesetup.gif"));

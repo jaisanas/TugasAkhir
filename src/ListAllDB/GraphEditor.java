@@ -1,15 +1,19 @@
 /**
  * Copyright (c) 2006-2012, JGraph Ltd */
-package com.mxgraph.examples.swing;
+package ListAllDB;
 
 import java.awt.Color;
 import java.awt.Point;
+import java.io.File;
 import java.net.URL;
 import java.text.NumberFormat;
 import java.util.Iterator;
 import java.util.List;
+
 import javax.swing.ImageIcon;
 import javax.swing.UIManager;
+
+import java.util.*;
 
 import org.w3c.dom.Document;
 
@@ -27,6 +31,7 @@ import com.mxgraph.swing.util.mxSwingConstants;
 import com.mxgraph.util.mxConstants;
 import com.mxgraph.util.mxEvent;
 import com.mxgraph.util.mxEventObject;
+import com.mxgraph.util.mxXmlUtils;
 import com.mxgraph.util.mxEventSource.mxIEventListener;
 import com.mxgraph.util.mxPoint;
 import com.mxgraph.util.mxResources;
@@ -53,22 +58,24 @@ public class GraphEditor extends BasicGraphEditor
 	 * connections. This is currently unused.
 	 */
 	public static URL url = null;
-
+	
+	public static  ArrayList<String> labelGraph = new ArrayList<String>();
+	
 	//GraphEditor.class.getResource("/com/mxgraph/examples/swing/images/connector.gif");
 
 	public GraphEditor()
 	{
-		this("mxGraph Editor", new CustomGraphComponent(new CustomGraph()));
+		this("mxGraph Editor", new CustomGraphComponent(new CustomGraph()), labelGraph);
 	}
 
 	/**
 	 * 
 	 */
-	public GraphEditor(String appTitle, mxGraphComponent component)
+	public GraphEditor(String appTitle, mxGraphComponent component, final ArrayList<String> l)
 	{
 		super(appTitle, component);
 		final mxGraph graph = graphComponent.getGraph();
-
+		
 		// Creates the shapes palette
 		EditorPalette shapesPalette = insertPalette(mxResources.get("shapes"));
 		EditorPalette imagesPalette = insertPalette(mxResources.get("images"));
@@ -89,7 +96,19 @@ public class GraphEditor extends BasicGraphEditor
 
 					if (graph.getModel().isEdge(cell))
 					{
+						String x = graph.getLabel(cell);
+						
+						System.out.println("sisi "+x);
 						((CustomGraph) graph).setEdgeTemplate(cell);
+						l.add(x);
+						System.out.println("sisi "+x);
+					}
+					
+					if(graph.getModel().isVertex(cell)) {
+						String y = graph.getLabel(cell);
+						l.add(y);
+						System.out.println("simpul "+ y);
+						
 					}
 				}
 			}
@@ -126,49 +145,49 @@ public class GraphEditor extends BasicGraphEditor
 						new ImageIcon(
 								GraphEditor.class
 										.getResource("/com/mxgraph/examples/swing/images/rectangle.png")),
-						null, 160, 120, "");
+						null, 160, 120, "Rectangle");
 		shapesPalette
 				.addTemplate(
 						"Rounded Rectangle",
 						new ImageIcon(
 								GraphEditor.class
 										.getResource("/com/mxgraph/examples/swing/images/rounded.png")),
-						"rounded=1", 160, 120, "");
+						"rounded=1", 160, 120, "Rounded Rectangle");
 		shapesPalette
 				.addTemplate(
 						"Double Rectangle",
 						new ImageIcon(
 								GraphEditor.class
 										.getResource("/com/mxgraph/examples/swing/images/doublerectangle.png")),
-						"rectangle;shape=doubleRectangle", 160, 120, "");
+						"rectangle;shape=doubleRectangle", 160, 120, "Double Rectangle");
 		shapesPalette
 				.addTemplate(
 						"Ellipse",
 						new ImageIcon(
 								GraphEditor.class
 										.getResource("/com/mxgraph/examples/swing/images/ellipse.png")),
-						"ellipse", 160, 160, "");
+						"ellipse", 160, 160, "Ellipse");
 		shapesPalette
 				.addTemplate(
 						"Double Ellipse",
 						new ImageIcon(
 								GraphEditor.class
 										.getResource("/com/mxgraph/examples/swing/images/doubleellipse.png")),
-						"ellipse;shape=doubleEllipse", 160, 160, "");
+						"ellipse;shape=doubleEllipse", 160, 160, "Double Ellipse");
 		shapesPalette
 				.addTemplate(
 						"Triangle",
 						new ImageIcon(
 								GraphEditor.class
 										.getResource("/com/mxgraph/examples/swing/images/triangle.png")),
-						"triangle", 120, 160, "");
+						"triangle", 120, 160, "Triangle");
 		shapesPalette
 				.addTemplate(
 						"Rhombus",
 						new ImageIcon(
 								GraphEditor.class
 										.getResource("/com/mxgraph/examples/swing/images/rhombus.png")),
-						"rhombus", 160, 160, "");
+						"rhombus", 160, 160, "Rhombus");
 		shapesPalette
 				.addTemplate(
 						"Horizontal Line",
@@ -501,7 +520,14 @@ public class GraphEditor extends BasicGraphEditor
 					}
 				}
 			}
-			System.out.println("test 2");
+			for(int i = 0; i < cells.length; i++) {
+				Object cell = cells[i];
+				String x = graph.getLabel(cell);
+				System.out.println(dx+" "+dy);
+				mxIGraphModel md = graph.getModel();
+			
+				System.out.println("label dari bla bla"+x);
+			}
 			return super.importCells(cells, dx, dy, target, location);
 		}
 
@@ -651,6 +677,13 @@ public class GraphEditor extends BasicGraphEditor
 		}
 
 	}
+	
+	protected static void resetEditor(GraphEditor editor)
+	{
+		editor.setModified(false);
+		editor.getUndoManager().clear();
+		editor.getGraphComponent().zoomAndCenter();
+	}
 
 	/**
 	 * 
@@ -671,6 +704,52 @@ public class GraphEditor extends BasicGraphEditor
 		mxConstants.W3C_SHADOWCOLOR = "#D3D3D3";
 
 		GraphEditor editor = new GraphEditor();
+		mxGraph graph = editor.getGraphComponent().getGraph();
+		try {
+		Document document = mxXmlUtils
+				.parseXml(mxUtils.readFile("C:/Users/jais/Desktop/proyek/y/jais.mxe"));
+		mxCodec codec = new mxCodec(document);
+		codec.decode(
+				document.getDocumentElement(),
+				graph.getModel());
+		editor.setCurrentFile(new File("C:/Users/jais/Desktop/proyek/y/jais.mxe"));
+		resetEditor(editor);
+		}catch(Exception e) {
+			e.getMessage();
+		}
 		editor.createFrame(new EditorMenuBar(editor)).setVisible(true);
+		System.out.println(labelGraph.size());
 	}
+	
+	public static void initGraphEditor(String file) {
+		try
+		{
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		}
+		catch (Exception e1)
+		{
+			e1.printStackTrace();
+		}
+
+		mxSwingConstants.SHADOW_COLOR = Color.LIGHT_GRAY;
+		mxConstants.W3C_SHADOWCOLOR = "#D3D3D3";
+
+		GraphEditor editor = new GraphEditor();
+		mxGraph graph = editor.getGraphComponent().getGraph();
+		try {
+		Document document = mxXmlUtils
+				.parseXml(mxUtils.readFile(file));
+		mxCodec codec = new mxCodec(document);
+		codec.decode(
+				document.getDocumentElement(),
+				graph.getModel());
+		editor.setCurrentFile(new File(file));
+		resetEditor(editor);
+		}catch(Exception e) {
+			e.getMessage();
+		}
+		editor.createFrame(new EditorMenuBar(editor)).setVisible(true);
+		System.out.println(labelGraph.size());
+	}
+	
 }
